@@ -1,14 +1,10 @@
-import os
 import torch
-import torchvision
 from torch import nn
-from torchvision import transforms
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 import imageio.v3 as iio
 import numpy as np
 import matplotlib.pyplot as plt
-import time
 import math
 import random
 from pathlib import Path
@@ -57,7 +53,7 @@ class hashNerf(nn.Module):
                 input_shape: int,
                 hidden_units: int,
                 output_shape: int,
-                L=16, T=2**18, F=2, N_min=8, N_max=256, num_output=3):
+                L=16, T=2**18, F=2, N_min=16, N_max=128, num_output=3):
         self.L = L
         self.T = T
         self.F = F
@@ -165,7 +161,7 @@ def saveImage(frame_note, psnr_note=39):
     #encode coordinates into debug matrix
     for i in range(0, x_test_T.shape[0]):
         for j in range(0, x_test_T.shape[1]):
-            reconstruction_input_matrix[i][j] = torch.as_tensor([i/(video.shape[1]-3.0),j/(video.shape[2]-3.0)]).type(torch.float32)
+            reconstruction_input_matrix[i][j] = torch.as_tensor([i/(video.shape[1]),j/(video.shape[2])]).type(torch.float32)
     reconstruction_input_matrix = torch.flatten(reconstruction_input_matrix, 0, 1)
     model_0.eval()
     with torch.inference_mode():
@@ -183,7 +179,7 @@ model_0 = hashNerf(32, 128, 3)
 t = 0 # frame number
 workingFrame = video[t]
 training_data = SingleImageDataset(workingFrame)
-train_loader = DataLoader(training_data, batch_size=2**16, shuffle=True)
+train_loader = DataLoader(training_data, batch_size=2**14, shuffle=True)
 
 #params
 lr1 = 0.01
